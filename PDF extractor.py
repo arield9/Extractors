@@ -2,6 +2,9 @@ import fitz
 import re
 import requests
 import webbrowser
+from pathlib import Path
+import argparse
+import sys
 
 
 def pdf_text_reader(file_path):
@@ -21,7 +24,7 @@ def pdf_file_extractor(file_path):
         with fitz.open(file_path) as pdf:
             embedded_files = pdf.embfile_count()
             for emb_file in range(embedded_files):
-                save_path = input("Type the path you want to save the file to: ")
+                save_path = Path("Type the path you want to save the file to: ")
                 with open(save_path, "wb") as file:
                     file_data = pdf.embfile_get(0)
                     file.write(file_data)
@@ -71,10 +74,10 @@ def process_url(url):
 
 def path():
     global file_path
-    file_path = input("Put your file full path here: ")
+    file_path = Path("Put your file full path here: ")
     
 
-def quiz():
+def main():
     print(r''' Welcome to:
           
   _____  _____  ______   ______      _                  _             
@@ -86,23 +89,30 @@ def quiz():
                                                                       
                                                                       
 ''')
-    decision = input(''' Please choose which extractor do you need:
-                     1. Text Extractor.
-                     2. Embedded Files Extractor.
-                     3. MetaData Extractor (only dates for now).
-                     4. URL Extractor and Crawler
-                     
-                     Extractor number: ''')
-    path()
-    if decision == '1':
-        pdf_text_reader(file_path)
-    elif decision == '2':
-        pdf_file_extractor(file_path)
-    elif decision == '3':
-        pdf_metadata(file_path)
-    elif decision == '4':
-        pdf_url_extractor(file_path)
-    else:
-        print("Invalid extractor, please choose an available one.")
+    parser = argparse.ArgumentParser(prog="PDF Extractor", description="Extracting Text, URLs, Metadata and embedded files from PDFs")
+    parser.add_argument("file_path", type=Path, help="Enter your file path to extract")
+    parser.add_argument("-t", "--text", action="store_true", help="Extracts the text from the PDF")
+    parser.add_argument("-e", "--embedded", action="store_true", help="Extracts the embedded files from the PDF")
+    parser.add_argument("-m", "--metadata", action="store_true", help="Extracts Metadata of the PDF")
+    parser.add_argument("-u", "--urls", action="store_true", help="Extracts URLs from the PDF")
+    options = parser.parse_args()   
+    file_path = options.file_path
+    print(options)
 
-quiz()
+    if len(sys.argv) < 2:
+        parser.print_help()
+        sys.exit(1)
+    
+    if options.text:
+        pdf_text_reader(file_path)
+    if options.embedded:
+        pdf_file_extractor(file_path)
+    if options.metadata:
+        pdf_metadata(file_path)
+    if options.urls:
+        pdf_url_extractor(file_path)
+
+
+if __name__ == "__main__":
+    main()
+    
