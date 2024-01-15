@@ -5,6 +5,7 @@ import webbrowser
 from pathlib import Path
 import argparse
 import sys
+import os
 
 
 def pdf_text_reader(file_path):
@@ -24,9 +25,13 @@ def pdf_file_extractor(file_path):
         with fitz.open(file_path) as pdf:
             embedded_files = pdf.embfile_count()
             for emb_file in range(embedded_files):
-                save_path = Path("Type the path you want to save the file to: ")
-                with open(save_path, "wb") as file:
+                file_name = "extracted"
+                dir = Path(os.environ.get('USERPROFILE')) / 'Downloads'
+                suffix = ".bin"
+                save_path = os.path.join(dir, file_name + suffix)
+                with Path.open(save_path, "wb") as file:
                     file_data = pdf.embfile_get(0)
+                    # save_path.write_bytes(file_data.read_bytes())
                     file.write(file_data)
     except FileNotFoundError:
         print(f"File not found, please make sure it's the right path: {file_path}")
@@ -97,7 +102,6 @@ def main():
     parser.add_argument("-u", "--urls", action="store_true", help="Extracts URLs from the PDF")
     options = parser.parse_args()   
     file_path = options.file_path
-    print(options)
 
     if len(sys.argv) < 2:
         parser.print_help()
@@ -111,6 +115,7 @@ def main():
         pdf_metadata(file_path)
     if options.urls:
         pdf_url_extractor(file_path)
+
 
 
 if __name__ == "__main__":
