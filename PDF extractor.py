@@ -32,6 +32,7 @@ def pdf_file_extractor(file_path):
                 with Path.open(save_path, "wb") as file:
                     file_data = pdf.embfile_get(0)
                     file.write(file_data)
+                    print("The extracted file created on your Desktop")
     except FileNotFoundError:
         print(f"File not found, please make sure it's the right path: {file_path}")
 
