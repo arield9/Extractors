@@ -26,12 +26,11 @@ def pdf_file_extractor(file_path):
             embedded_files = pdf.embfile_count()
             for emb_file in range(embedded_files):
                 file_name = "extracted"
-                dir = Path(os.environ.get('USERPROFILE')) / 'Downloads'
+                dir = Path(os.environ.get('USERPROFILE')) / 'Desktop'
                 suffix = ".bin"
                 save_path = os.path.join(dir, file_name + suffix)
                 with Path.open(save_path, "wb") as file:
                     file_data = pdf.embfile_get(0)
-                    # save_path.write_bytes(file_data.read_bytes())
                     file.write(file_data)
     except FileNotFoundError:
         print(f"File not found, please make sure it's the right path: {file_path}")
