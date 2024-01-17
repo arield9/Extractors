@@ -1,11 +1,13 @@
 import fitz
 import re
-import requests
-import webbrowser
-from pathlib import Path
-import argparse
 import sys
 import os
+from pathlib import Path
+
+import requests
+import webbrowser
+import argparse
+
 import pyfiglet
 
 
@@ -14,7 +16,6 @@ class PDFExtractor:
 
     def __init__(self, file_path):
         self.file_path = file_path
-
         
     def pdf_text_reader(self):
         try:
@@ -24,15 +25,14 @@ class PDFExtractor:
                 text = chr(12).join([page.get_text() for page in pages_range])
                 print(text)
         except FileNotFoundError:
-            print(f"File not found, please make sure it's the right path: {file_path}")
+            print(f"File not found, please make sure it's the right path: {self.file_path}")
 
-
-    def pdf_file_extractor(file_path):
+    def pdf_file_extractor(self):
         try:
-            with fitz.open(file_path) as pdf:
+            with fitz.open(self.file_path) as pdf:
                 embedded_files = pdf.embfile_count()
                 for emb_file in range(embedded_files):
-                    file_name = "extracted"
+                    file_name = str(pdf.embfile_names())
                     dir = Path(os.environ.get('USERPROFILE')) / 'Desktop'
                     suffix = ".bin"
                     save_path = os.path.join(dir, file_name + suffix)
@@ -41,36 +41,33 @@ class PDFExtractor:
                         file.write(file_data)
                         print("The extracted file created on your Desktop")
         except FileNotFoundError:
-            print(f"File not found, please make sure it's the right path: {file_path}")
+            print(f"File not found, please make sure it's the right path: {self.file_path}")
 
-
-    def pdf_metadata(file_path):
+    def pdf_metadata(self):
         try:
-            with fitz.open(file_path) as pdf:
+            with fitz.open(self.file_path) as pdf:
                 last_mod = pdf.metadata["modDate"]
                 creat_date = pdf.metadata["creationDate"]
                 print(f"""
                     The date that the file was created: {creat_date}
                     The last date the file was modified: {last_mod}""")
         except FileNotFoundError:
-            print(f"File not found, please make sure it's the right path: {file_path}")
+            print(f"File not found, please make sure it's the right path: {self.file_path}")
 
-
-    def pdf_url_extractor(file_path):
+    def pdf_url_extractor(self):
         try:
-            with fitz.open(file_path) as pdf:
+            with fitz.open(self.file_path) as pdf:
                 content = chr(12).join([page.get_text() for page in pdf])
                 url_matches = re.findall(r"(https?://[a-zA-Z0-9.=-]+(?:/[^\"\']*?)?)", content)
 
                 if url_matches:
                     for url in url_matches:
                         print(url)
-                        pdf_extractor.process_url(url)
+                        PDFExtractor.process_url(url)
                 else:
                     print("No URLs were extracted from the PDF")
         except FileNotFoundError:
-            print(f"File not found, please make sure it's the right path: {file_path}")
-
+            print(f"File not found, please make sure it's the right path: {self.file_path}")
 
     def process_url(url):
         try:
@@ -81,11 +78,6 @@ class PDFExtractor:
                 webbrowser.open(url)
         except Exception as err:
             print(err)
-
-
-
-
-
 
 
 def main():
@@ -101,7 +93,6 @@ def main():
     parser.add_argument("-u", "--urls", action="store_true", help="Extracts URLs from the PDF")
     options = parser.parse_args()   
     pdf_extractor = PDFExtractor(options.file_path)
-    # pdf_extractor.file_path = options.file_path
 
     if len(sys.argv) < 2:
         parser.print_help()
@@ -115,7 +106,6 @@ def main():
         pdf_extractor.pdf_metadata()
     if options.urls:
         pdf_extractor.pdf_url_extractor()
-
 
 
 if __name__ == "__main__":
