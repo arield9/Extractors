@@ -46,11 +46,18 @@ class PDFExtractor:
     def pdf_metadata(self):
         try:
             with fitz.open(self.file_path) as pdf:
+                create_app = pdf.metadata["creator"]
+                encryption = pdf.metadata["encryption"]
+                keywords = pdf.metadata["keywords"]
+                author = pdf.metadata["author"]
                 last_mod = pdf.metadata["modDate"]
                 creat_date = pdf.metadata["creationDate"]
                 print(f"""
                     The date that the file was created: {creat_date}
-                    The last date the file was modified: {last_mod}""")
+                    The last date the file was modified: {last_mod}
+                    The author of the file: {author}
+                    The encryption that used for the file: {encryption}
+                    Keywords from the file: {keywords}""")
         except FileNotFoundError:
             print(f"File not found, please make sure it's the right path: {self.file_path}")
 
